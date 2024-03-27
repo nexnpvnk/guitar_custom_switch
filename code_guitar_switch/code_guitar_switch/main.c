@@ -76,8 +76,8 @@ ISR (TIMERx_OVF_vect)
 */
 
 
-#define COMMON_CATHODE
-//#define COMMON_ANODE
+//#define COMMON_CATHODE
+#define COMMON_ANODE
 
 
 #define a _BV(PORTD2)
@@ -101,7 +101,9 @@ ISR (TIMERx_OVF_vect)
 #define out3 _BV(PORTC3)
 #define out4 _BV(PORTC4)
 #define out5 _BV(PORTC5)
-#define out6 _BV(PORTC6)
+
+// The seven mode output is arduino: 11 (PORTB3)
+#define out6 _BV(PORTB3)
 
 
 void InitHardware(void)
@@ -116,8 +118,12 @@ void InitHardware(void)
 	PORTB |= COMMAND_BUTTON;
 	
 	// Init the Preset outputs
-	DDRC |= out0 | out1 | out2 | out3 | out4 | out5 | out6;
-	PORTC |= out0 | out1 | out2 | out3 | out4 | out5 | out6;
+	DDRC |= out0 | out1 | out2 | out3 | out4 | out5;
+	DDRB |= out6;
+	PORTC &= ~(out0 | out1 | out2 | out3);
+	PORTC |= out4;
+	PORTC &= ~out5;
+	PORTB |= out6;
 }
 
 
@@ -354,67 +360,103 @@ uint8_t ButtonHandler(void)
 
 void ModesOuptutHandler(uint8_t* modes)
 {
-	switch(modes[0])
-	{
-		case 0:
-		
-		break;
-		
-		case 1:
-		
-		break;
-		
-		case 2:
-		
-		break;
-		
-		case 3:
-		
-		break;
-		
-		case 4:
-		
-		break;
-		
-		case 5:
-		
-		break;		
-	}
-	
+//	Для первого (левого) разряда от 0 до 5:
+//		A0 A1 A2 A3
+//		0123
+//	0 - 0000
+//	1 - 1001
+//	2 - 0101
+//	3 - 0011
+//	4 - 1101
+//	5 - 0111
 	switch(modes[1])
 	{
-		case 1:
+		case 0:
+		PORTC &= ~(out0 | out1 | out2 | out3);
+		break;
 		
+		case 1:
+		PORTC &= ~(out1 | out2);
+		PORTC |= out0 | out3;
 		break;
 		
 		case 2:
-		
+		PORTC &= ~(out0 | out2);
+		PORTC |= out1 | out3;
 		break;
 		
 		case 3:
-		
+		PORTC &= ~(out0 | out1);
+		PORTC |= out2 | out3;
 		break;
 		
 		case 4:
-		
+		PORTC |= out0 | out1 | out3;
+		PORTC &= ~out2;
 		break;
 		
 		case 5:
+		PORTC |= out1 | out2 | out3;
+		PORTC &= ~out0;
+		break;
+	}
+//	Для второго (правого) разряда от 1 до 8:
+//		A4 A5 11 (out6)
+//		456
+//	1 - 101
+//	2 - 110
+//	3 - 111
+//	4 - 000
+//	5 - 001
+//	6 - 010
+//	7 - 011
+//	8 - 100
+	switch(modes[0])
+	{
+		case 1:
+		PORTC |= out4;
+		PORTB |= out6;
+		PORTC &= ~out5;
+		break;
 		
+		case 2:
+		PORTC |= out4 | out5;
+		PORTB &= ~out6;
+		break;
+		
+		case 3:
+		PORTC |= out4 | out5;
+		PORTB |= out6;
+		break;
+		
+		case 4:
+		PORTC &= ~(out4 | out5);
+		PORTB &= ~out6;
+		break;
+		
+		case 5:
+		PORTC &= ~(out4 | out5);
+		PORTB |= out6;
 		break;
 		
 		case 6:
-		
+		PORTC &= ~out4;
+		PORTC |= out5;
+		PORTB &= ~out6;
 		break;
 		
 		case 7:
-		
+		PORTC &= ~out4;
+		PORTC |= out5;
+		PORTB |= out6;
 		break;
 		
 		case 8:
-		
+		PORTC |= out4;
+		PORTC &= ~out5;
+		PORTB &= ~out6;
 		break;
-	}
+	}	
 }
 
 int main(void)
@@ -425,21 +467,21 @@ int main(void)
 	sei();
 	
 
-	uint8_t modes[2] = {0, 1};
+	uint8_t modes[2] = {1, 0};
     while (1)
     {
 		switch (ButtonHandler()) {
 			case USER_ACTION_NONE:
 			break;
 			case USER_ACTION_CLICK:
-			if (++modes[1] > 8)
+			if (++modes[0] > 8)
 			{
-				modes[1] = 1;
+				modes[0] = 1;
 			}
 			break;
 			case USER_ACTION_PRESS:
-			if (++modes[0] > 5) {
-				modes[0] = 0;
+			if (++modes[1] > 5) {
+				modes[1] = 0;
 			}
 			break;
 		}
