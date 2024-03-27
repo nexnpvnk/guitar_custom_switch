@@ -14,6 +14,10 @@
 #include <util/delay.h>
 
 
+#ifdef _cplusplus
+	extern "C" {
+#endif
+
 
 // choose an AVR timer as systick
 #define TIMERx 0
@@ -72,8 +76,8 @@ ISR (TIMERx_OVF_vect)
 */
 
 
-//#define COMMON_CATHODE
-#define COMMON_ANODE
+#define COMMON_CATHODE
+//#define COMMON_ANODE
 
 
 #define a _BV(PORTD2)
@@ -311,7 +315,7 @@ typedef enum
 	} ButtonState;
 
 
-UserAction ButtonHandler(void)
+uint8_t ButtonHandler(void)
 {
 	static ButtonState BUTTON_STATE = BUTTON_STATE_RELEASED; 
 	static uint32_t ButtonDebounceTimer = 0;
@@ -444,4 +448,10 @@ int main(void)
 		ModesOuptutHandler(modes);
     }
 }
+
+
+
+#ifdef _cplusplus
+}
+#endif
 
