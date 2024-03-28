@@ -326,8 +326,12 @@ uint8_t ButtonHandler(void)
 	static ButtonState BUTTON_STATE = BUTTON_STATE_RELEASED; 
 	static uint32_t ButtonDebounceTimer = 0;
 	static uint32_t ButtonPressedTimer = 0;
-	const volatile uint32_t ButtonDebounceTimeout = 50;
-	const volatile uint32_t ButtonPressedTimeout = 500;
+	
+	static const volatile uint32_t ButtonDebounceTimeout = 50;
+	
+	
+	// Change this , unit in ms
+	static const volatile uint32_t ButtonPressedTimeout = 3000;
 	
 	if (sys_ms - ButtonDebounceTimer > ButtonDebounceTimeout)
 	{
